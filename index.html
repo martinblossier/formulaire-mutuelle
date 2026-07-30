@@ -258,12 +258,37 @@
     max-width: 440px;
     margin: -4px auto clamp(6px, 1.2vh, 12px);
   }
+  #msf-widget .msf-age-scroll-wrap {
+    position: relative;
+  }
   #msf-widget .msf-age-scroll {
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding: clamp(3px, 1vh, 6px) 20px clamp(4px, 1vh, 10px);
+    padding: clamp(3px, 1vh, 6px) 30px clamp(4px, 1vh, 10px);
     scroll-snap-type: x proximity;
+  }
+  #msf-widget .msf-age-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--msf-primary);
+    pointer-events: none;
+    z-index: 2;
+    animation: msf-age-arrow-slide 1.4s ease-in-out infinite;
+  }
+  #msf-widget .msf-age-arrow-left { left: 0; animation-direction: normal; }
+  #msf-widget .msf-age-arrow-right { right: 0; animation-direction: reverse; }
+  @keyframes msf-age-arrow-slide {
+    0%, 100% { opacity: .35; transform: translateY(-50%) translateX(0); }
+    50% { opacity: 1; transform: translateY(-50%) translateX(-4px); }
+  }
+  #msf-widget .msf-age-arrow-right { animation-name: msf-age-arrow-slide-right; }
+  @keyframes msf-age-arrow-slide-right {
+    0%, 100% { opacity: .35; transform: translateY(-50%) translateX(0); }
+    50% { opacity: 1; transform: translateY(-50%) translateX(4px); }
   }
   #msf-widget .msf-age-btn {
     flex: 0 0 auto;
@@ -335,6 +360,18 @@
     white-space: nowrap;
   }
   #msf-widget .msf-partner-badge img { max-height: 18px; display: block; }
+
+  /* ---- Variante compacte (petits logos sur la 1re et la dernière page) ---- */
+  #msf-widget .msf-partner-block-compact { margin-top: clamp(6px, 1.4vh, 12px); text-align: center; }
+  #msf-widget .msf-partner-logos-compact {
+    margin-top: 0;
+    gap: 5px 6px;
+  }
+  #msf-widget .msf-partner-badge-compact {
+    padding: 3px 8px;
+    font-size: 9px;
+  }
+  #msf-widget .msf-partner-badge-compact img { max-height: 13px; }
 
   /* ---- Choix simples (Oui/Non, niveaux, secteur...) ---- */
   #msf-widget .msf-options {
@@ -800,12 +837,13 @@
   // partenaires réels. Pour afficher un vrai logo au lieu du nom en texte,
   // renseignez "logoUrl" (image hébergée par vous, avec vos droits d'usage).
   var PARTNER_BRANDS = [
-    { name: "Malakoff Humanis", logoUrl: "" },
-    { name: "AG2R La Mondiale", logoUrl: "" },
-    { name: "Harmonie Mutuelle", logoUrl: "" },
-    { name: "April", logoUrl: "" },
-    { name: "MAAF Santé", logoUrl: "" },
-    { name: "Groupama", logoUrl: "" }
+    { name: "Apivia", logoUrl: "images/apivia.png" },
+    { name: "AÉSIO Mutuelle", logoUrl: "images/aesio.png" },
+    { name: "Groupama", logoUrl: "images/groupama.png" },
+    { name: "MAAF", logoUrl: "images/maaf.webp" },
+    { name: "April", logoUrl: "images/april.png" },
+    { name: "AG2R La Mondiale", logoUrl: "images/ag2r-la-mondiale.webp" },
+    { name: "Malakoff Humanis", logoUrl: "images/malakoff-humanis.png" }
   ];
 
   // Accroche affichée uniquement sur le tout premier écran du formulaire.
@@ -1136,8 +1174,8 @@
     setTimeout(function () { goNext(true); }, 260);
   }
 
-  // Photo du conseiller — placeholder (renseignez AGENT_PHOTO_URL pour afficher une vraie photo)
-  var AGENT_PHOTO_URL = '';
+  // Photo du conseiller — renseignez AGENT_PHOTO_URL pour afficher une vraie photo
+  var AGENT_PHOTO_URL = 'images/conseillere.jpg';
 
   function renderAgentPhoto() {
     var photo = el('div', 'msf-agent-photo');
@@ -1162,6 +1200,32 @@
     cardEl.appendChild(res);
     setActivePhase(3);
     pushDataLayer('msf_age_gate');
+  }
+
+  // Bloc de logos partenaires réutilisable (écran d'accueil, interstitiel, écran final).
+  // compact = true -> version réduite (petits badges, sans intitulé), utilisée en
+  // première et dernière page pour ne pas alourdir ces écrans.
+  function renderPartnerLogos(compact) {
+    if (!PARTNER_BRANDS || !PARTNER_BRANDS.length) return null;
+    var container = el('div', compact ? 'msf-partner-block msf-partner-block-compact' : 'msf-partner-block');
+    if (!compact) {
+      container.appendChild(el('div', 'msf-partner-label', 'Nous comparons notamment les offres de'));
+    }
+    var logosRow = el('div', 'msf-partner-logos' + (compact ? ' msf-partner-logos-compact' : ''));
+    PARTNER_BRANDS.forEach(function (brand) {
+      var badge = el('span', 'msf-partner-badge' + (compact ? ' msf-partner-badge-compact' : ''));
+      if (brand.logoUrl) {
+        var img = document.createElement('img');
+        img.src = brand.logoUrl;
+        img.alt = brand.name;
+        badge.appendChild(img);
+      } else {
+        badge.textContent = brand.name;
+      }
+      logosRow.appendChild(badge);
+    });
+    container.appendChild(logosRow);
+    return container;
   }
 
   function renderInterstitialStep() {
@@ -1231,6 +1295,7 @@
   }
 
   function renderAgePickerStep(step) {
+    var wrap = el('div', 'msf-age-scroll-wrap');
     var scroll = el('div', 'msf-age-scroll');
     var selectedBtn = null;
     for (var age = step.min; age <= step.max; age++) {
@@ -1246,7 +1311,10 @@
       })(age, btn);
       scroll.appendChild(btn);
     }
-    cardEl.appendChild(scroll);
+    wrap.appendChild(el('span', 'msf-age-arrow msf-age-arrow-left', '‹'));
+    wrap.appendChild(scroll);
+    wrap.appendChild(el('span', 'msf-age-arrow msf-age-arrow-right', '›'));
+    cardEl.appendChild(wrap);
     nextBtn.style.display = 'none';
     setTimeout(function () {
       var target = selectedBtn || scroll.children[Math.min(65 - step.min, scroll.children.length - 1)];
@@ -1271,6 +1339,8 @@
           '<span class="msf-hero-trust-item">🕐 Devis en 2 minutes</span>' +
         '</div>';
       cardEl.appendChild(hero);
+      var heroLogos = renderPartnerLogos(true);
+      if (heroLogos) cardEl.appendChild(heroLogos);
     }
 
     if (step.type !== 'ageGate') {
@@ -1822,6 +1892,8 @@
       '<div class="msf-result-title">Merci, votre demande a bien été envoyée !</div>' +
       '<div class="msf-result-text">Un conseiller vous recontactera prochainement pour vous accompagner dans votre projet.</div>';
     cardEl.appendChild(res);
+    var successLogos = renderPartnerLogos(true);
+    if (successLogos) cardEl.appendChild(successLogos);
   }
 
   function renderErrorScreen() {
