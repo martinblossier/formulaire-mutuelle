@@ -29,9 +29,10 @@
   /* ============================================================
      TENUE DANS LA LIGNE DE FLOTTAISON (desktop + mobile)
      Le body centre verticalement tout le contenu dans la hauteur
-     visible ; si un écran a exceptionnellement trop de contenu
-     pour un très petit mobile, seule la carte (.msf-card) défile
-     en interne — jamais la page entière.
+     visible. Aucun scroll interne n'est utilisé nulle part dans le
+     flux principal : les tailles/marges utilisent clamp() basé sur
+     la hauteur de viewport (vh) pour rétrécir fluidement sur les
+     petits écrans plutôt que de faire défiler quoi que ce soit.
      ============================================================ */
   html, body {
     height: 100%;
@@ -43,7 +44,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100dvh;
-    padding: 10px;
+    padding: clamp(4px, 1.5vh, 10px);
   }
 
   #msf-widget {
@@ -53,11 +54,19 @@
     font-family: var(--msf-font);
     color: var(--msf-text);
   }
+  /* Sur les écrans larges, on étend le formulaire en largeur plutôt que de
+     laisser un contenu défiler verticalement dans la carte. */
+  @media (min-width: 700px) {
+    #msf-widget { max-width: 760px; }
+  }
+  @media (min-width: 1000px) {
+    #msf-widget { max-width: 880px; }
+  }
   #msf-widget .msf-shell {
     position: relative;
     background: var(--msf-bg);
     border-radius: var(--msf-radius);
-    padding: 12px 14px 14px;
+    padding: clamp(8px, 1.8vh, 12px) 14px clamp(8px, 1.8vh, 14px);
   }
 
   /* ---- Bouton "Contactez-nous" (visible sur toutes les questions) ---- */
@@ -88,7 +97,7 @@
   #msf-widget .msf-tabs {
     display: flex;
     gap: 16px;
-    margin-top: 12px;
+    margin-top: clamp(6px, 1.4vh, 12px);
   }
   #msf-widget .msf-tab { flex: 1; min-width: 0; }
   #msf-widget .msf-tab-label {
@@ -98,7 +107,7 @@
     font-weight: 700;
     font-size: 13px;
     color: var(--msf-muted);
-    margin-bottom: 8px;
+    margin-bottom: clamp(4px, 1vh, 8px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -126,10 +135,8 @@
   #msf-widget .msf-card {
     background: var(--msf-card);
     border-radius: var(--msf-radius);
-    padding: 16px 16px;
+    padding: clamp(8px, 2vh, 16px) 16px;
     min-height: 0;
-    max-height: calc(100dvh - 190px);
-    overflow-y: auto;
     box-shadow: 0 1px 3px rgba(0,0,0,.06);
   }
   #msf-widget .msf-eyebrow {
@@ -139,24 +146,24 @@
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .04em;
-    margin: 0 0 6px;
+    margin: 0 0 clamp(3px, 0.8vh, 6px);
   }
   #msf-widget .msf-title {
     text-align: center;
     color: var(--msf-text);
     font-weight: 700;
-    font-size: 18px;
+    font-size: clamp(15px, 2.2vh, 18px);
     line-height: 1.3;
-    margin: 0 0 14px;
+    margin: 0 0 clamp(6px, 1.6vh, 14px);
   }
   /* ---- Accroche affichée uniquement sur le tout premier écran ---- */
-  #msf-widget .msf-hero { text-align: center; margin-bottom: 10px; }
+  #msf-widget .msf-hero { text-align: center; margin-bottom: clamp(5px, 1.2vh, 10px); }
   #msf-widget .msf-hero-title {
-    font-size: 19px;
+    font-size: clamp(16px, 2.4vh, 19px);
     font-weight: 800;
     color: var(--msf-text);
     line-height: 1.25;
-    margin-bottom: 6px;
+    margin-bottom: clamp(3px, 0.8vh, 6px);
   }
   #msf-widget .msf-hero-subtitle {
     font-size: 14px;
@@ -171,7 +178,7 @@
     justify-content: center;
     align-items: center;
     gap: 6px 12px;
-    margin-top: 10px;
+    margin-top: clamp(4px, 1vh, 10px);
     font-size: 12px;
     font-weight: 700;
     color: var(--msf-muted);
@@ -182,28 +189,31 @@
     text-align: center;
     color: var(--msf-muted);
     font-size: 14px;
-    margin: -8px 0 12px;
+    margin: -8px 0 clamp(6px, 1.5vh, 12px);
   }
 
   /* ---- Choix illustrés (icônes) ---- */
   #msf-widget .msf-icon-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: clamp(6px, 1.5vh, 12px);
+  }
+  @media (min-width: 700px) {
+    #msf-widget .msf-icon-grid { grid-template-columns: repeat(4, 1fr); }
   }
   #msf-widget .msf-icon-btn {
     background: #fff;
     border: 2px solid var(--msf-border);
     border-radius: var(--msf-radius-sm);
-    padding: 18px 10px;
+    padding: clamp(8px, 2vh, 18px) 8px;
     text-align: center;
     cursor: pointer;
     font-family: inherit;
     color: var(--msf-text);
     transition: all .15s ease;
   }
-  #msf-widget .msf-icon-btn .msf-icon { font-size: 30px; display: block; margin-bottom: 8px; }
-  #msf-widget .msf-icon-btn .msf-icon-label { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  #msf-widget .msf-icon-btn .msf-icon { font-size: clamp(20px, 4vh, 30px); display: block; margin-bottom: clamp(3px, 1vh, 8px); }
+  #msf-widget .msf-icon-btn .msf-icon-label { font-size: clamp(12px, 1.6vh, 14px); font-weight: 600; line-height: 1.25; }
   #msf-widget .msf-icon-btn:hover, #msf-widget .msf-icon-btn:focus-visible { border-color: var(--msf-primary); }
   #msf-widget .msf-icon-btn.active {
     border-color: var(--msf-primary);
@@ -223,17 +233,17 @@
 
   /* ---- Photo du conseiller (visible sur chaque question) ---- */
   #msf-widget .msf-agent-photo {
-    width: 52px;
-    height: 52px;
+    width: clamp(38px, 7vh, 52px);
+    height: clamp(38px, 7vh, 52px);
     border-radius: 50%;
-    margin: 0 auto 10px;
+    margin: 0 auto clamp(4px, 1.2vh, 10px);
     overflow: hidden;
     background: var(--msf-primary-light);
     color: var(--msf-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: clamp(17px, 3vh, 24px);
     border: 3px solid #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,.12);
   }
@@ -246,25 +256,25 @@
     font-size: 13px;
     line-height: 1.4;
     max-width: 440px;
-    margin: -6px auto 12px;
+    margin: -4px auto clamp(6px, 1.2vh, 12px);
   }
   #msf-widget .msf-age-scroll {
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding: 6px 20px 10px;
+    padding: clamp(3px, 1vh, 6px) 20px clamp(4px, 1vh, 10px);
     scroll-snap-type: x proximity;
   }
   #msf-widget .msf-age-btn {
     flex: 0 0 auto;
-    width: 48px;
-    height: 48px;
+    width: clamp(36px, 7vh, 48px);
+    height: clamp(36px, 7vh, 48px);
     border-radius: 50%;
     border: 2px solid var(--msf-border);
     background: #fff;
     color: var(--msf-text);
     font-weight: 700;
-    font-size: 15px;
+    font-size: clamp(13px, 2vh, 15px);
     cursor: pointer;
     font-family: inherit;
     scroll-snap-align: center;
@@ -277,20 +287,20 @@
   }
 
   /* ---- Écran interstitiel de réassurance (avant les coordonnées) ---- */
-  #msf-widget .msf-interstitial { text-align: center; padding: 8px 6px; }
+  #msf-widget .msf-interstitial { text-align: center; padding: clamp(4px, 1vh, 8px) 6px; }
   #msf-widget .msf-interstitial-icon {
-    width: 48px;
-    height: 48px;
+    width: clamp(36px, 7vh, 48px);
+    height: clamp(36px, 7vh, 48px);
     border-radius: 50%;
     background: #e3f8ea;
     color: #1e9e56;
-    font-size: 22px;
+    font-size: clamp(17px, 3vh, 22px);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 10px;
+    margin: 0 auto clamp(4px, 1.2vh, 10px);
   }
-  #msf-widget .msf-interstitial-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  #msf-widget .msf-interstitial-title { font-size: clamp(15px, 2.2vh, 17px); font-weight: 700; margin-bottom: clamp(3px, 0.8vh, 6px); }
   #msf-widget .msf-interstitial-text {
     color: var(--msf-muted);
     font-size: 14px;
@@ -330,7 +340,7 @@
   #msf-widget .msf-options {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(6px, 1.2vh, 10px);
     flex-wrap: wrap;
   }
   #msf-widget .msf-option-btn {
@@ -338,11 +348,11 @@
     border: 2px solid var(--msf-border);
     color: var(--msf-text);
     font-weight: 700;
-    font-size: 15px;
-    padding: 12px 18px;
+    font-size: clamp(13px, 1.8vh, 15px);
+    padding: clamp(8px, 1.8vh, 12px) 16px;
     border-radius: var(--msf-radius-sm);
     cursor: pointer;
-    min-width: 110px;
+    min-width: 100px;
     flex: 1 1 auto;
     max-width: 220px;
     font-family: inherit;
@@ -355,8 +365,8 @@
     color: #fff;
   }
   #msf-widget .msf-option-btn-wide {
-    font-size: 15px;
-    padding: 14px 16px;
+    font-size: clamp(13px, 1.8vh, 15px);
+    padding: clamp(8px, 1.8vh, 14px) 14px;
     max-width: 260px;
   }
 
@@ -367,19 +377,19 @@
   }
   #msf-widget label.msf-label {
     display: block;
-    font-size: 14px;
+    font-size: clamp(13px, 1.6vh, 14px);
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: clamp(4px, 1vh, 8px);
     text-align: center;
   }
   #msf-widget input[type="text"],
   #msf-widget input[type="tel"],
   #msf-widget input[type="email"] {
     width: 100%;
-    padding: 14px 16px;
+    padding: clamp(8px, 1.8vh, 14px) 14px;
     border-radius: var(--msf-radius-sm);
     border: 2px solid var(--msf-border);
-    font-size: 17px;
+    font-size: 16px;
     background: #fff;
     color: var(--msf-text);
     font-family: inherit;
@@ -404,20 +414,23 @@
   #msf-widget .msf-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: clamp(8px, 1.5vh, 14px);
     max-width: 480px;
     margin: 0 auto;
   }
-  #msf-widget .msf-form-field { display: flex; flex-direction: column; gap: 6px; }
+  @media (min-width: 700px) {
+    #msf-widget .msf-form-grid { grid-template-columns: 1fr 1fr 1fr; max-width: 100%; }
+  }
+  #msf-widget .msf-form-field { display: flex; flex-direction: column; gap: 4px; }
   #msf-widget .msf-form-field.msf-span2 { grid-column: 1 / -1; }
   #msf-widget .msf-form-field label { font-size: 13px; font-weight: 600; color: var(--msf-text); }
 
   #msf-widget .msf-consent {
     max-width: 480px;
-    margin: 20px auto 0;
+    margin: clamp(10px, 2vh, 20px) auto 0;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: clamp(8px, 1.5vh, 14px);
   }
   #msf-widget .msf-checkbox-row {
     display: flex;
@@ -430,7 +443,7 @@
     flex-shrink: 0;
     margin-top: 2px;
   }
-  #msf-widget .msf-checkbox-row label { font-size: 13px; line-height: 1.5; color: var(--msf-text); }
+  #msf-widget .msf-checkbox-row label { font-size: 12px; line-height: 1.4; color: var(--msf-text); }
   #msf-widget .msf-checkbox-row a { color: var(--msf-primary); text-decoration: underline; }
 
   /* Honeypot : invisible et hors du flux de tabulation */
@@ -449,13 +462,13 @@
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    margin-top: 10px;
+    margin-top: clamp(6px, 1.4vh, 10px);
   }
   #msf-widget .msf-btn {
     border: none;
     border-radius: var(--msf-radius-sm);
-    padding: 11px 22px;
-    font-size: 15px;
+    padding: clamp(9px, 1.8vh, 11px) 20px;
+    font-size: clamp(13px, 1.8vh, 15px);
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
@@ -477,19 +490,19 @@
   /* ---- Écran de résultat / envoi ---- */
   #msf-widget .msf-result {
     text-align: center;
-    padding: 10px 10px 4px;
+    padding: clamp(6px, 1.5vh, 10px) 10px 4px;
   }
   #msf-widget .msf-result-icon {
-    width: 48px;
-    height: 48px;
+    width: clamp(36px, 7vh, 48px);
+    height: clamp(36px, 7vh, 48px);
     border-radius: 50%;
     background: var(--msf-success);
     color: #fff;
-    font-size: 24px;
+    font-size: clamp(18px, 3.5vh, 24px);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 12px;
+    margin: 0 auto clamp(6px, 1.4vh, 12px);
   }
   #msf-widget .msf-result-icon.msf-loading {
     background: var(--msf-primary);
@@ -500,9 +513,9 @@
     50% { opacity: .7; transform: scale(.92); }
   }
   #msf-widget .msf-result-title {
-    font-size: 19px;
+    font-size: clamp(16px, 2.2vh, 19px);
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: clamp(4px, 1vh, 8px);
   }
   #msf-widget .msf-result-text {
     color: var(--msf-muted);
@@ -655,17 +668,22 @@
   .msf-legal-footer .msf-legal-sep { margin: 0 6px; color: #d5d8db; }
 
   @media (max-width: 480px) {
-    #msf-widget .msf-form-grid { grid-template-columns: 1fr; }
-    #msf-widget .msf-form-field.msf-span2 { grid-column: auto; }
-    #msf-widget .msf-card { padding: 14px 12px; max-height: calc(100dvh - 170px); }
-    #msf-widget .msf-icon-grid { grid-template-columns: 1fr 1fr; }
-    #msf-widget .msf-option-btn { min-width: 90px; padding: 11px 10px; font-size: 14px; }
+    #msf-widget .msf-card { padding: clamp(6px, 2vh, 12px) 10px; }
+    #msf-widget .msf-option-btn { min-width: 78px; padding: clamp(7px, 1.6vh, 10px) 8px; font-size: 13px; }
     #msf-widget .msf-nav { flex-wrap: wrap; }
     #msf-widget .msf-tabs { gap: 8px; }
     #msf-widget .msf-tab-label { font-size: 10px; }
     #msf-widget .msf-hero-title { font-size: 17px; }
     #msf-widget .msf-hero-subtitle { font-size: 13px; }
     .msf-legal-footer { font-size: 9px; line-height: 1.5; }
+  }
+
+  /* ---- Écrans très bas en hauteur (mobile paysage, petits laptops) ---- */
+  @media (max-height: 620px) {
+    #msf-widget .msf-hero-trust { display: none; }
+    #msf-widget .msf-subtitle { display: none; }
+    #msf-widget .msf-age-description { display: none; }
+    #msf-widget .msf-partner-label, #msf-widget .msf-partner-logos { display: none; }
   }
 </style>
 </head>
