@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* ============================================================
+     VARIABLES DE MARQUE — à personnaliser (couleurs, arrondis...)
+     ============================================================ */
+  #msf-widget {
+    --msf-primary: #f2921f;
+    --msf-primary-dark: #d97e10;
+    --msf-primary-light: #fdf1e2;
+    --msf-bg: #eef0f1;
+    --msf-card: #ffffff;
+    --msf-text: #232e3d;
+    --msf-muted: #6b7280;
+    --msf-border: #d5d8db;
+    --msf-error: #d0442c;
+    --msf-error-bg: #fdecec;
+    --msf-success: #f2921f;
+    --msf-radius: 16px;
+    --msf-radius-sm: 8px;
+    --msf-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  #msf-widget, #msf-widget * { box-sizing: border-box; }
+  #msf-widget {
+    max-width: 640px;
+    margin: 0 auto;
+    font-family: var(--msf-font);
+    color: var(--msf-text);
+  }
+  #msf-widget .msf-shell {
+    position: relative;
+    background: var(--msf-bg);
+    border-radius: var(--msf-radius);
+    padding: 20px 16px 24px;
+  }
+
+  /* ---- Bouton "Contactez-nous" (visible sur toutes les questions) ---- */
+  #msf-widget .msf-contact-btn {
+    position: absolute;
+    top: 20px;
+    right: 16px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 2px solid var(--msf-border);
+    color: var(--msf-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  #msf-widget .msf-contact-btn:hover { border-color: var(--msf-primary); }
+  @media (max-width: 480px) {
+    #msf-widget .msf-contact-btn { position: static; margin: 0 0 14px; width: 100%; justify-content: center; }
+  }
+
+  /* ---- Progression (3 onglets avec coche + barre individuelle) ---- */
+  #msf-widget .msf-tabs {
+    display: flex;
+    gap: 16px;
+    margin-top: 22px;
+  }
+  #msf-widget .msf-tab { flex: 1; min-width: 0; }
+  #msf-widget .msf-tab-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--msf-muted);
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #msf-widget .msf-tab-check { display: none; color: #1e9e56; font-weight: 900; }
+  #msf-widget .msf-tab.completed .msf-tab-check { display: inline; }
+  #msf-widget .msf-tab.completed .msf-tab-label { color: #1e9e56; }
+  #msf-widget .msf-tab.active .msf-tab-label { color: var(--msf-primary); }
+  #msf-widget .msf-tab-track {
+    height: 6px;
+    border-radius: 4px;
+    background: var(--msf-border);
+    overflow: hidden;
+  }
+  #msf-widget .msf-tab-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--msf-primary);
+    border-radius: 4px;
+    transition: width .3s ease;
+  }
+  #msf-widget .msf-tab.completed .msf-tab-fill { background: #1e9e56; }
+
+  /* ---- Carte question ---- */
+  #msf-widget .msf-card {
+    background: var(--msf-card);
+    border-radius: var(--msf-radius);
+    padding: 28px 20px;
+    min-height: 260px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  #msf-widget .msf-eyebrow {
+    text-align: center;
+    color: var(--msf-primary);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin: 0 0 8px;
+  }
+  #msf-widget .msf-title {
+    text-align: center;
+    color: var(--msf-text);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.35;
+    margin: 0 0 22px;
+  }
+  /* ---- Accroche affichée uniquement sur le tout premier écran ---- */
+  #msf-widget .msf-hero { text-align: center; margin-bottom: 18px; }
+  #msf-widget .msf-hero-title {
+    font-size: 23px;
+    font-weight: 800;
+    color: var(--msf-text);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  #msf-widget .msf-hero-subtitle {
+    font-size: 15px;
+    color: var(--msf-muted);
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.45;
+  }
+  #msf-widget .msf-hero-trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 14px;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--msf-muted);
+  }
+  #msf-widget .msf-hero-trust-item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  #msf-widget .msf-hero-trust-sep { color: var(--msf-border); }
+  #msf-widget .msf-subtitle {
+    text-align: center;
+    color: var(--msf-muted);
+    font-size: 15px;
+    margin: -14px 0 20px;
+  }
+
+  /* ---- Choix illustrés (icônes) ---- */
+  #msf-widget .msf-icon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  #msf-widget .msf-icon-btn {
+    background: #fff;
+    border: 2px solid var(--msf-border);
+    border-radius: var(--msf-radius-sm);
+    padding: 18px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--msf-text);
+    transition: all .15s ease;
+  }
+  #msf-widget .msf-icon-btn .msf-icon { font-size: 30px; display: block; margin-bottom: 8px; }
+  #msf-widget .msf-icon-btn .msf-icon-label { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  #msf-widget .msf-icon-btn:hover, #msf-widget .msf-icon-btn:focus-visible { border-color: var(--msf-primary); }
+  #msf-widget .msf-icon-btn.active {
+    border-color: var(--msf-primary);
+    background: var(--msf-primary-light);
+  }
+
+  /* ---- Encart d'aide (ex : sélection multiple) ---- */
+  #msf-widget .msf-hint {
+    background: #eef4fb;
+    color: #3b556b;
+    border-radius: var(--msf-radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    text-align: center;
+    margin: -10px 0 20px;
+  }
+
+  /* ---- Photo du conseiller (visible sur chaque question) ---- */
+  #msf-widget .msf-agent-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    overflow: hidden;
+    background: var(--msf-primary-light);
+    color: var(--msf-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  }
+  #msf-widget .msf-agent-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ---- Sélecteur d'âge (boutons circulaires défilants) ---- */
+  #msf-widget .msf-age-description {
+    text-align: center;
+    color: var(--msf-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 440px;
+    margin: -14px auto 22px;
+  }
+  #msf-widget .msf-age-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 6px 20px 14px;
+    scroll-snap-type: x proximity;
+  }
+  #msf-widget .msf-age-btn {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--msf-border);
+    background: #fff;
+    color: var(--msf-text);
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+    font-family: inherit;
+    scroll-snap-align: center;
+  }
+  #msf-widget .msf-age-btn:hover, #msf-widget .msf-age-btn:focus-visible { border-color: var(--msf-primary); }
+  #msf-widget .msf-age-btn.active {
+    background: var(--msf-primary);
+    border-color: var(--msf-primary);
+    color: #fff;
+  }
+
+  /* ---- Écran interstitiel de réassurance (avant les coordonnées) ---- */
+  #msf-widget .msf-interstitial { text-align: center; padding: 20px 10px; }
+  #msf-widget .msf-interstitial-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e3f8ea;
+    color: #1e9e56;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+  }
+  #msf-widget .msf-interstitial-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  #msf-widget .msf-interstitial-text {
+    color: var(--msf-muted);
+    font-size: 15px;
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  #msf-widget .msf-partner-label {
+    margin-top: 22px;
+    font-size: 12px;
+    color: var(--msf-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  #msf-widget .msf-partner-logos {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 10px;
+  }
+  #msf-widget .msf-partner-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--msf-border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--msf-muted);
+    white-space: nowrap;
+  }
+  #msf-widget .msf-partner-badge img { max-height: 18px; display: block; }
+
+  /* ---- Choix simples (Oui/Non, niveaux, secteur...) ---- */
+  #msf-widget .msf-options {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #msf-widget .msf-option-btn {
+    background: #fff;
+    border: 2px solid var(--msf-border);
+    color: var(--msf-text);
+    font-weight: 700;
+    font-size: 16px;
+    padding: 16px 22px;
+    border-radius: var(--msf-radius-sm);
+    cursor: pointer;
+    min-width: 130px;
+    flex: 1 1 auto;
+    max-width: 220px;
+    font-family: inherit;
+    transition: all .15s ease;
+  }
+  #msf-widget .msf-option-btn:hover, #msf-widget .msf-option-btn:focus-visible { border-color: var(--msf-primary); }
+  #msf-widget .msf-option-btn.active {
+    background: var(--msf-primary);
+    border-color: var(--msf-primary);
+    color: #fff;
+  }
+  #msf-widget .msf-option-btn-wide {
+    font-size: 15px;
+    padding: 14px 16px;
+    max-width: 260px;
+  }
+
+  /* ---- Champs texte / date ---- */
+  #msf-widget .msf-field {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+  #msf-widget label.msf-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  #msf-widget input[type="text"],
+  #msf-widget input[type="tel"],
+  #msf-widget input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--msf-radius-sm);
+    border: 2px solid var(--msf-border);
+    font-size: 17px;
+    background: #fff;
+    color: var(--msf-text);
+    font-family: inherit;
+  }
+  #msf-widget input:focus {
+    outline: none;
+    border-color: var(--msf-primary);
+  }
+  #msf-widget .msf-error {
+    color: var(--msf-error);
+    background: var(--msf-error-bg);
+    border-radius: var(--msf-radius-sm);
+    padding: 8px 12px;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    display: none;
+  }
+  #msf-widget .msf-error.show { display: block; }
+
+  /* ---- Formulaire coordonnées (étape 2) ---- */
+  #msf-widget .msf-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  #msf-widget .msf-form-field { display: flex; flex-direction: column; gap: 6px; }
+  #msf-widget .msf-form-field.msf-span2 { grid-column: 1 / -1; }
+  #msf-widget .msf-form-field label { font-size: 13px; font-weight: 600; color: var(--msf-text); }
+
+  #msf-widget .msf-consent {
+    max-width: 480px;
+    margin: 20px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #msf-widget .msf-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  #msf-widget .msf-checkbox-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  #msf-widget .msf-checkbox-row label { font-size: 13px; line-height: 1.5; color: var(--msf-text); }
+  #msf-widget .msf-checkbox-row a { color: var(--msf-primary); text-decoration: underline; }
+
+  /* Honeypot : invisible et hors du flux de tabulation */
+  #msf-widget .msf-hidden-field {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  /* ---- Navigation ---- */
+  #msf-widget .msf-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 18px;
+  }
+  #msf-widget .msf-btn {
+    border: none;
+    border-radius: var(--msf-radius-sm);
+    padding: 14px 26px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #msf-widget .msf-btn-ghost {
+    background: transparent;
+    color: var(--msf-muted);
+    padding-left: 4px;
+  }
+  #msf-widget .msf-btn-ghost:hover { color: var(--msf-text); }
+  #msf-widget .msf-btn-primary {
+    background: var(--msf-primary);
+    color: #fff;
+    margin-left: auto;
+  }
+  #msf-widget .msf-btn-primary:hover { background: var(--msf-primary-dark); }
+  #msf-widget .msf-btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+  /* ---- Écran de résultat / envoi ---- */
+  #msf-widget .msf-result {
+    text-align: center;
+    padding: 30px 10px 10px;
+  }
+  #msf-widget .msf-result-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--msf-success);
+    color: #fff;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+  }
+  #msf-widget .msf-result-icon.msf-loading {
+    background: var(--msf-primary);
+    animation: msf-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes msf-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .7; transform: scale(.92); }
+  }
+  #msf-widget .msf-result-title {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  #msf-widget .msf-result-text {
+    color: var(--msf-muted);
+    font-size: 15px;
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* ---- Modale "Contactez-nous" ---- */
+  .msf-contact-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 24, 30, .55);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+  .msf-contact-overlay.show { display: flex; }
+  .msf-contact-modal {
+    position: relative;
+    background: #fff;
+    border-radius: 20px;
+    max-width: 460px;
+    width: 100%;
+    padding: 32px 28px 28px;
+    text-align: center;
+    font-family: var(--msf-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif);
+    color: #232e3d;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .msf-contact-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #f1f3f5;
+    font-size: 18px;
+    cursor: pointer;
+    color: #232e3d;
+  }
+  .msf-contact-modal-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #eef4fb;
+    color: #2c4a6e;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .msf-contact-modal-title { font-size: 24px; font-weight: 800; color: #2c4a6e; margin-bottom: 6px; }
+  .msf-contact-modal-subtitle { color: #6b7280; font-size: 15px; margin-bottom: 20px; }
+  .msf-contact-modal-card {
+    background: #f4f6f8;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  .msf-contact-modal-card-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2c4a6e;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .msf-contact-modal-card-title { font-weight: 700; color: #2c4a6e; margin-bottom: 4px; }
+  .msf-contact-modal-card-text { color: #4b5563; font-size: 14px; line-height: 1.5; }
+  .msf-contact-modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 18px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .msf-contact-modal-list li { display: flex; align-items: center; gap: 10px; font-size: 15px; color: #232e3d; }
+  .msf-contact-modal-list .msf-check {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #e3f8ea;
+    color: #1e9e56;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .msf-contact-modal-privacy { font-size: 12px; color: #9ca3af; margin-bottom: 18px; }
+  .msf-contact-modal-privacy a { color: #6b7280; }
+  .msf-contact-modal-countdown {
+    background: #e3f8ea;
+    color: #1e7a45;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+  .msf-contact-modal-call {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: #2c4a6e;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 20px;
+    font-weight: 800;
+    text-decoration: none;
+    font-family: inherit;
+  }
+  .msf-contact-modal-call:hover { background: #23394f; }
+
+  .msf-legal-footer {
+    max-width: 640px;
+    margin: 16px auto 0;
+    padding: 0 16px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  .msf-legal-footer a { color: #6b7280; text-decoration: underline; }
+  .msf-legal-footer a:hover { color: #232e3d; }
+  .msf-legal-footer .msf-legal-sep { margin: 0 8px; color: #d5d8db; }
+
+  @media (max-width: 480px) {
+    #msf-widget .msf-form-grid { grid-template-columns: 1fr; }
+    #msf-widget .msf-form-field.msf-span2 { grid-column: auto; }
+    #msf-widget .msf-card { padding: 22px 14px; min-height: 220px; }
+    #msf-widget .msf-icon-grid { grid-template-columns: 1fr 1fr; }
+    #msf-widget .msf-option-btn { min-width: 100px; padding: 14px 12px; }
+    #msf-widget .msf-nav { flex-wrap: wrap; }
+    #msf-widget .msf-tabs { gap: 8px; }
+    #msf-widget .msf-tab-label { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="msf-widget">
+  <div class="msf-shell">
+
+    <button type="button" class="msf-contact-btn" id="msf-contact-btn">📞 Contactez-nous</button>
+
+    <div class="msf-card" id="msf-card"><!-- injecté en JS --></div>
+
+    <div class="msf-nav" id="msf-nav">
+      <button type="button" class="msf-btn msf-btn-ghost" id="msf-prev">← Précédent</button>
+      <button type="button" class="msf-btn msf-btn-primary" id="msf-next" style="display:none;">Continuer</button>
+    </div>
+
+    <div class="msf-tabs" id="msf-tabs">
+      <div class="msf-tab" data-phase="1">
+        <div class="msf-tab-label"><span class="msf-tab-check">✓</span><span>Votre projet</span></div>
+        <div class="msf-tab-track"><div class="msf-tab-fill"></div></div>
+      </div>
+      <div class="msf-tab" data-phase="2">
+        <div class="msf-tab-label"><span class="msf-tab-check">✓</span><span>Vos coordonnées</span></div>
+        <div class="msf-tab-track"><div class="msf-tab-fill"></div></div>
+      </div>
+      <div class="msf-tab" data-phase="3">
+        <div class="msf-tab-label"><span class="msf-tab-check">✓</span><span>Résultat</span></div>
+        <div class="msf-tab-track"><div class="msf-tab-fill"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Champs cachés : tracking publicitaire, remplis au chargement -->
+  <input type="hidden" id="msf-utm-source">
+  <input type="hidden" id="msf-utm-medium">
+  <input type="hidden" id="msf-utm-campaign">
+  <input type="hidden" id="msf-utm-content">
+  <input type="hidden" id="msf-utm-term">
+  <input type="hidden" id="msf-gclid">
+  <input type="hidden" id="msf-fbclid">
+  <input type="hidden" id="msf-current-url">
+  <input type="hidden" id="msf-referrer-url">
+</div>
+
+<!-- Encart légal : à placer sous la ligne de flottaison. Remplacez les 4 ancres
+     "#mentions-legales", "#cgu", "#politique-cookies" et
+     "#politique-de-confidentialite" par les vraies URL de vos pages légales
+     une fois celles-ci rédigées et publiées (mentions légales, CGU, politique
+     cookies, politique de gestion des données personnelles — incluant la
+     durée de conservation des données, obligatoire au titre du RGPD). -->
+<div class="msf-legal-footer">
+  <a href="#mentions-legales" target="_blank" rel="noopener">Mentions légales</a>
+  <span class="msf-legal-sep" aria-hidden="true">|</span>
+  <a href="#cgu" target="_blank" rel="noopener">Conditions générales d'utilisation</a>
+  <span class="msf-legal-sep" aria-hidden="true">|</span>
+  <a href="#politique-cookies" target="_blank" rel="noopener">Politique de gestion des cookies</a>
+  <span class="msf-legal-sep" aria-hidden="true">|</span>
+  <a href="#politique-de-confidentialite" target="_blank" rel="noopener">Politique de gestion des données personnelles</a>
+</div>
+
+<div class="msf-contact-overlay" id="msf-contact-overlay">
+  <div class="msf-contact-modal">
+    <button type="button" class="msf-contact-modal-close" id="msf-contact-modal-close" aria-label="Fermer">✕</button>
+    <div class="msf-contact-modal-icon">📞</div>
+    <div class="msf-contact-modal-title">Votre ligne directe</div>
+    <div class="msf-contact-modal-subtitle">Un conseiller expert vous attend</div>
+
+    <div class="msf-contact-modal-card">
+      <div class="msf-contact-modal-card-icon">✓</div>
+      <div>
+        <div class="msf-contact-modal-card-title">Un expert à votre écoute</div>
+        <div class="msf-contact-modal-card-text">Notre conseiller analysera vos besoins pour vous proposer <strong>l'offre mutuelle la plus adaptée</strong>.</div>
+      </div>
+    </div>
+
+    <ul class="msf-contact-modal-list">
+      <li><span class="msf-check">✓</span> Comparaison <strong>gratuite</strong></li>
+      <li><span class="msf-check">✓</span> Conseils <strong>sans engagement</strong></li>
+      <li><span class="msf-check">✓</span> Accompagnement <strong>complet</strong></li>
+    </ul>
+
+    <div class="msf-contact-modal-privacy">En appelant, vous acceptez le traitement de vos données. <a href="#politique-de-confidentialite" target="_blank" rel="noopener">Confidentialité</a></div>
+
+    <div class="msf-contact-modal-countdown">⏱ Réservé pendant <span id="msf-contact-countdown">4:50</span></div>
+
+    <a class="msf-contact-modal-call" id="msf-contact-modal-call" href="tel:0123456789">📞 01 23 45 67 89</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // CONFIGURATION — à adapter par Martin
+  // ============================================================
+  var WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz4Kz8n9O95ABrNcWhklSnzzz6V1pk_JpdK7aIHePqvgVPhDZWVzKhJM1fykUBoBtJ85g/exec";
+  var PRIVACY_URL = "#politique-de-confidentialite";
+  var TERMS_URL = "#cgu";
+  // Preuve d'opt-in (CNIL) : incrémentez cette version à chaque fois que vous
+  // modifiez le texte de la case RGPD ci-dessous, afin de savoir exactement
+  // quelle formulation chaque lead historique a acceptée.
+  var CONSENT_VERSION = "v1 - 26/07/2026";
+  // Numéro affiché dans la modale "Contactez-nous" — à remplacer par votre ligne.
+  var CONTACT_PHONE_DISPLAY = "01 23 45 67 89";
+  var CONTACT_PHONE_TEL = "0123456789";
+  // Logos de réassurance affichés sur l'écran interstitiel (juste avant "Vos
+  // coordonnées"). ATTENTION : n'affichez que des compagnies avec lesquelles
+  // vous avez un accord/partenariat réel — utiliser le nom ou le logo d'un
+  // assureur sans autorisation expose à un risque de droit des marques et de
+  // pratiques commerciales trompeuses. Remplacez la liste ci-dessous par vos
+  // partenaires réels. Pour afficher un vrai logo au lieu du nom en texte,
+  // renseignez "logoUrl" (image hébergée par vous, avec vos droits d'usage).
+  var PARTNER_BRANDS = [
+    { name: "Malakoff Humanis", logoUrl: "" },
+    { name: "AG2R La Mondiale", logoUrl: "" },
+    { name: "Harmonie Mutuelle", logoUrl: "" },
+    { name: "April", logoUrl: "" },
+    { name: "MAAF Santé", logoUrl: "" },
+    { name: "Groupama", logoUrl: "" }
+  ];
+
+  // Accroche affichée uniquement sur le tout premier écran du formulaire.
+  // ATTENTION : un chiffre d'économie annoncé ("jusqu'à X %") doit pouvoir
+  // être justifié (étude/comparatif réel) pour éviter un risque de publicité
+  // trompeuse — vérifiez ce chiffre avant mise en ligne.
+  var HERO_TITLE = "Comparez et économisez jusqu'à 36 % sur votre mutuelle";
+  var HERO_SUBTITLE = "Répondez à quelques questions rapides pour obtenir les meilleures offres pour votre profil.";
+
+  // Barème de scoring (modifiable librement)
+  var SCORING = {
+    age: { seuilSenior: 60, seuilInter: 50, ptsSenior: 30, ptsInter: 15, ptsAutre: 5 },
+    couverture: { ptsAucune: 20, ptsContratAncien: 15, ptsContratRecent: 5 },
+    niveauRemboursement: { ptsMax: 20 },
+    urgenceContrat: { joursCourt: 30, joursMoyen: 90, ptsCourt: 15, ptsMoyen: 8, ptsLong: 2 },
+    foyer: { seul: 2, conjoint: 7, enfants: 5, conjoint_enfants: 10 },
+    seuilQualification: 40,
+    seuilChaud: 70
+  };
+
+  var root = document.getElementById('msf-widget');
+  var cardEl = document.getElementById('msf-card');
+  var prevBtn = document.getElementById('msf-prev');
+  var nextBtn = document.getElementById('msf-next');
+  var tabEls = root.querySelectorAll('.msf-tab');
+
+  // Met à jour l'apparence des 3 onglets (coche + barre de progression
+  // individuelle) à partir d'un état par phase : 'done' (100%, vert, coché),
+  // 'active' (en cours, orange) ou 'pending' (pas encore atteint, gris).
+  function renderTabs(states) {
+    tabEls.forEach(function (tabEl) {
+      var phase = parseInt(tabEl.getAttribute('data-phase'), 10);
+      var state = states[phase] || { status: 'pending', pct: 0 };
+      var fillEl = tabEl.querySelector('.msf-tab-fill');
+      tabEl.classList.toggle('completed', state.status === 'done');
+      tabEl.classList.toggle('active', state.status === 'active');
+      fillEl.style.width = state.pct + '%';
+    });
+  }
+
+  // Force un état "terminal" (ex : dead-end âge, envoi en cours, succès) :
+  // toutes les phases avant `phase` sont marquées terminées, `phase` est active.
+  function setActivePhase(phase) {
+    var states = {};
+    [1, 2, 3].forEach(function (p) {
+      if (p < phase) states[p] = { status: 'done', pct: 100 };
+      else if (p === phase) states[p] = { status: 'active', pct: 100 };
+      else states[p] = { status: 'pending', pct: 0 };
+    });
+    renderTabs(states);
+  }
+
+  var formData = {}; // toutes les réponses collectées
+  var currentIndex = 0;
+  var stage = 'questions'; // 'questions' | 'sending' | 'done'
+
+  // ============================================================
+  // Listes de référence
+  // ============================================================
+  var PROFESSIONS = ['Retraité', 'Salarié', 'Indépendant', 'Sans emploi'];
+  var REGIMES = [
+    'Régime général (salarié)', 'MSA (agricole)', 'Régime des indépendants',
+    'Régime spécial (fonction publique)', 'Autre'
+  ];
+  var NIVEAUX = ['Minimum', 'Moyen', 'Fort', 'Maximum'];
+  var BESOINS_OPTIONS = [
+    { value: 'Audition', icon: '👂', label: 'Audition' },
+    { value: 'Dentaire', icon: '🦷', label: 'Dentaire' },
+    { value: 'Optique', icon: '👓', label: 'Optique' },
+    { value: 'Hospitalisation', icon: '🏥', label: 'Hospitalisation' },
+    { value: 'Kinésithérapie', icon: '🧘', label: 'Kinésithérapie' },
+    { value: 'Cure Thermale', icon: '💧', label: 'Cure Thermale' },
+    { value: 'Autres', icon: '⋯', label: 'Autres' },
+    { value: 'Aucun besoin spécifique', icon: '🚫', label: 'Aucun besoin spécifique' }
+  ];
+  var BESOIN_AUCUN = 'Aucun besoin spécifique';
+  var AGE_MINIMUM_SENIOR = 50;
+
+  function hasConjoint(fd) { return fd.foyer === 'conjoint' || fd.foyer === 'conjoint_enfants'; }
+  function hasEnfants(fd) { return fd.foyer === 'enfants' || fd.foyer === 'conjoint_enfants'; }
+  function isSecteurPublicProfile(prof) { return prof === 'Fonctionnaire / Enseignant'; }
+  function hasBesoin(fd, label) { return Array.isArray(fd.besoinsSpecifiques) && fd.besoinsSpecifiques.indexOf(label) !== -1; }
+  function isUnderSeniorAge(fd) {
+    var age = parseInt(fd.age, 10);
+    return !isNaN(age) && age < AGE_MINIMUM_SENIOR;
+  }
+
+  // ============================================================
+  // Définition des étapes (ordre fixe, visibilité conditionnelle)
+  // ============================================================
+  var STEPS = [
+    {
+      id: 'foyer', phase: 1, type: 'icon',
+      title: 'Qui souhaitez-vous assurer ?',
+      field: 'foyer',
+      options: [
+        { value: 'seul', icon: '👤', label: 'Vous seul' },
+        { value: 'conjoint', icon: '👥', label: 'Vous + conjoint' },
+        { value: 'enfants', icon: '👨‍👩‍👧', label: 'Vous + enfants' },
+        { value: 'conjoint_enfants', icon: '👨‍👩‍👧‍👦', label: 'Vous + conjoint + enfants' }
+      ]
+    },
+    {
+      id: 'couverture', phase: 1, type: 'yesno',
+      title: 'Avez-vous déjà une couverture santé ?',
+      field: 'couverture'
+    },
+    {
+      id: 'contrat', phase: 1, type: 'yesno',
+      title: 'Votre contrat actuel a-t-il plus d\'un an ?',
+      field: 'contrat',
+      condition: function (fd) { return fd.couverture === 'Oui'; }
+    },
+    {
+      id: 'besoinsSpecifiques', phase: 1, type: 'multiicon',
+      title: 'Avez-vous des besoins spécifiques ?',
+      helper: 'Sélectionnez un ou plusieurs besoins, puis cliquez sur Continuer.',
+      field: 'besoinsSpecifiques',
+      options: BESOINS_OPTIONS,
+      noneOption: BESOIN_AUCUN
+    },
+    {
+      id: 'dateContrat', phase: 1, type: 'date',
+      title: 'À partir de quelle date souhaitez-vous débuter votre contrat ?',
+      field: 'dateContrat',
+      dateBounds: 'future'
+    },
+    {
+      id: 'ageAssure', phase: 1, type: 'agepicker',
+      title: 'Quel est votre âge exact ?',
+      description: 'Comme vous le savez, le prix des mutuelles varie en fonction de l\'âge, j\'ai donc besoin de connaître le vôtre pour trouver l\'offre la plus avantageuse.',
+      field: 'age',
+      min: 18,
+      max: 99
+    },
+    {
+      id: 'ageGate', phase: 1, type: 'ageGate',
+      condition: isUnderSeniorAge
+    },
+    {
+      id: 'professionAssure', phase: 1, type: 'buttonlist',
+      title: 'Quelle est votre profession ?',
+      field: 'profession',
+      list: PROFESSIONS
+    },
+    {
+      id: 'regimeAssure', phase: 1, type: 'buttonlist',
+      title: 'Quel est votre régime social ?',
+      field: 'regimeSocial',
+      list: REGIMES
+    },
+    {
+      id: 'secteurAssure', phase: 1, type: 'choice2',
+      title: 'Vous exercez dans le secteur...',
+      field: 'secteurAssure',
+      choice2: ['Secteur public', 'Secteur privé'],
+      condition: function (fd) { return isSecteurPublicProfile(fd.profession); }
+    },
+    {
+      id: 'naissanceConjoint', phase: 1, type: 'year',
+      title: 'Quelle est l\'année de naissance de votre conjoint(e) ?',
+      field: 'naissanceConjoint',
+      yearBounds: 'adulte',
+      condition: hasConjoint
+    },
+    {
+      id: 'professionConjoint', phase: 1, type: 'buttonlist',
+      title: 'Quelle est la profession de votre conjoint(e) ?',
+      field: 'professionConjoint',
+      list: PROFESSIONS,
+      condition: hasConjoint
+    },
+    {
+      id: 'regimeConjoint', phase: 1, type: 'buttonlist',
+      title: 'Quel est le régime social de votre conjoint(e) ?',
+      field: 'regimeSocialConjoint',
+      list: REGIMES,
+      condition: hasConjoint
+    },
+    {
+      id: 'secteurConjoint', phase: 1, type: 'choice2',
+      title: 'Votre conjoint(e) exerce dans le secteur...',
+      field: 'secteurConjoint',
+      choice2: ['Secteur public', 'Secteur privé'],
+      condition: function (fd) { return hasConjoint(fd) && isSecteurPublicProfile(fd.professionConjoint); }
+    },
+    {
+      id: 'nombreEnfants', phase: 1, type: 'level4',
+      title: 'Combien d\'enfants souhaitez-vous assurer ?',
+      field: 'nombreEnfants',
+      level4: ['1', '2', '3', '4+'],
+      condition: hasEnfants
+    }
+  ];
+
+  // Étapes dynamiques : jusqu'à 4 dates de naissance d'enfants
+  for (var ce = 1; ce <= 4; ce++) {
+    (function (idx) {
+      STEPS.push({
+        id: 'naissanceEnfant' + idx, phase: 1, type: 'year',
+        title: 'Année de naissance — enfant ' + idx,
+        field: 'naissanceEnfant' + idx,
+        yearBounds: 'enfant',
+        condition: function (fd) { return hasEnfants(fd) && parseInt(fd.nombreEnfants, 10) >= idx; }
+      });
+    })(ce);
+  }
+
+  STEPS.push({ id: 'interstitial', phase: 1, type: 'interstitial' });
+  STEPS.push({ id: 'contact', phase: 2, type: 'contact', title: 'Vos coordonnées' });
+
+  function getVisibleSteps() {
+    return STEPS.filter(function (s) { return !s.condition || s.condition(formData); });
+  }
+
+  // ============================================================
+  // Masque de saisie date JJ/MM/AAAA (vanilla, sans dépendance)
+  // ============================================================
+  function attachDateMask(input) {
+    input.addEventListener('input', function () {
+      var digits = input.value.replace(/\D/g, '').slice(0, 8);
+      var out = digits;
+      if (digits.length > 4) {
+        out = digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+      } else if (digits.length > 2) {
+        out = digits.slice(0, 2) + '/' + digits.slice(2);
+      }
+      input.value = out;
+    });
+  }
+
+  function dateBoundsFor(kind) {
+    var now = new Date();
+    var year = now.getFullYear();
+    if (kind === 'future') {
+      var max = new Date(now); max.setFullYear(year + 2);
+      return { min: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1), max: max };
+    }
+    if (kind === 'adulte') {
+      return { min: new Date(1915, 0, 1), max: new Date(year - 18, now.getMonth(), now.getDate()) };
+    }
+    if (kind === 'enfant') {
+      return { min: new Date(year - 26, 0, 1), max: now };
+    }
+    return { min: new Date(1900, 0, 1), max: new Date(year + 5, 0, 1) };
+  }
+
+  function parseDateStr(str) {
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(str);
+    if (!m) return null;
+    var day = parseInt(m[1], 10), month = parseInt(m[2], 10), year = parseInt(m[3], 10);
+    if (month < 1 || month > 12) return null;
+    var d = new Date(year, month - 1, day);
+    if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+    return d;
+  }
+
+  function validateDate(str, kind) {
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+      return { valid: false, message: 'Merci de saisir une date complète au format JJ/MM/AAAA.' };
+    }
+    var d = parseDateStr(str);
+    if (!d) return { valid: false, message: 'Cette date n\'existe pas, merci de la corriger.' };
+    var bounds = dateBoundsFor(kind);
+    if (d < bounds.min || d > bounds.max) {
+      return { valid: false, message: 'Cette date semble incorrecte, merci de vérifier.' };
+    }
+    return { valid: true, date: d };
+  }
+
+  function attachYearMask(input) {
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/\D/g, '').slice(0, 4);
+    });
+  }
+
+  function yearBoundsFor(kind) {
+    var year = new Date().getFullYear();
+    if (kind === 'adulte') return { min: 1915, max: year - 18 };
+    if (kind === 'enfant') return { min: year - 26, max: year };
+    return { min: 1900, max: year };
+  }
+
+  function validateYear(str, kind) {
+    if (!/^\d{4}$/.test(str)) {
+      return { valid: false, message: 'Merci de saisir une année complète (4 chiffres).' };
+    }
+    var y = parseInt(str, 10);
+    var bounds = yearBoundsFor(kind);
+    if (y < bounds.min || y > bounds.max) {
+      return { valid: false, message: 'Cette année semble incorrecte, merci de vérifier.' };
+    }
+    return { valid: true };
+  }
+
+  // ============================================================
+  // Rendu des étapes
+  // ============================================================
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+
+  function clearErrorArea() {
+    var existing = cardEl.querySelector('.msf-error');
+    if (existing) { existing.textContent = ''; existing.classList.remove('show'); }
+  }
+
+  function showError(msg) {
+    var existing = cardEl.querySelector('.msf-error');
+    if (!existing) {
+      existing = el('div', 'msf-error');
+      cardEl.appendChild(existing);
+    }
+    existing.textContent = msg;
+    existing.classList.add('show');
+
+    var currentStep = getVisibleSteps()[currentIndex];
+    pushDataLayer('msf_step_error', {
+      step_id: currentStep ? currentStep.id : '',
+      error_message: msg
+    });
+  }
+
+  function autoAdvanceDelay() {
+    setTimeout(function () { goNext(true); }, 260);
+  }
+
+  // Photo du conseiller — placeholder (renseignez AGENT_PHOTO_URL pour afficher une vraie photo)
+  var AGENT_PHOTO_URL = '';
+
+  function renderAgentPhoto() {
+    var photo = el('div', 'msf-agent-photo');
+    if (AGENT_PHOTO_URL) {
+      var img = document.createElement('img');
+      img.src = AGENT_PHOTO_URL;
+      img.alt = 'Votre conseiller';
+      photo.appendChild(img);
+    } else {
+      photo.textContent = '👤';
+    }
+    return photo;
+  }
+
+  function renderAgeGateStep() {
+    document.getElementById('msf-nav').style.display = 'none';
+    var res = el('div', 'msf-result');
+    res.innerHTML =
+      '<div class="msf-result-icon" style="background:var(--msf-muted);">🙏</div>' +
+      '<div class="msf-result-title">Merci pour votre intérêt</div>' +
+      '<div class="msf-result-text">Ce formulaire est actuellement réservé aux personnes de ' + AGE_MINIMUM_SENIOR + ' ans et plus. Nous vous remercions pour le temps consacré à cette démarche.</div>';
+    cardEl.appendChild(res);
+    setActivePhase(3);
+    pushDataLayer('msf_age_gate');
+  }
+
+  function renderInterstitialStep() {
+    var res = el('div', 'msf-interstitial');
+    res.innerHTML =
+      '<div class="msf-interstitial-icon">✅</div>' +
+      '<div class="msf-interstitial-title">Nous avons identifié l\'offre qui correspond à vos besoins !</div>' +
+      '<div class="msf-interstitial-text">Encore quelques informations et un conseiller vous recontactera avec une proposition personnalisée.</div>';
+
+    if (PARTNER_BRANDS && PARTNER_BRANDS.length) {
+      var partnerLabel = el('div', 'msf-partner-label', 'Nous comparons notamment les offres de');
+      res.appendChild(partnerLabel);
+      var logosRow = el('div', 'msf-partner-logos');
+      PARTNER_BRANDS.forEach(function (brand) {
+        var badge = el('span', 'msf-partner-badge');
+        if (brand.logoUrl) {
+          var img = document.createElement('img');
+          img.src = brand.logoUrl;
+          img.alt = brand.name;
+          badge.appendChild(img);
+        } else {
+          badge.textContent = brand.name;
+        }
+        logosRow.appendChild(badge);
+      });
+      res.appendChild(logosRow);
+    }
+
+    cardEl.appendChild(res);
+    document.getElementById('msf-nav').style.display = 'flex';
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Continuer';
+  }
+
+  function renderMultiIconStep(step) {
+    if (step.helper) {
+      cardEl.appendChild(el('div', 'msf-hint', step.helper));
+    }
+    if (!Array.isArray(formData[step.field])) formData[step.field] = [];
+    var grid = el('div', 'msf-icon-grid');
+    step.options.forEach(function (opt) {
+      var btn = el('button', 'msf-icon-btn');
+      btn.type = 'button';
+      btn.innerHTML = '<span class="msf-icon">' + opt.icon + '</span><span class="msf-icon-label">' + opt.label + '</span>';
+      if (formData[step.field].indexOf(opt.value) !== -1) btn.classList.add('active');
+      btn.addEventListener('click', function () {
+        var selected = formData[step.field];
+        if (opt.value === step.noneOption) {
+          formData[step.field] = selected.indexOf(opt.value) !== -1 ? [] : [opt.value];
+        } else {
+          var idx = selected.indexOf(opt.value);
+          if (idx !== -1) {
+            selected.splice(idx, 1);
+          } else {
+            selected.push(opt.value);
+            var noneIdx = selected.indexOf(step.noneOption);
+            if (noneIdx !== -1) selected.splice(noneIdx, 1);
+          }
+        }
+        renderStep(step);
+      });
+      grid.appendChild(btn);
+    });
+    cardEl.appendChild(grid);
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Continuer';
+  }
+
+  function renderAgePickerStep(step) {
+    var scroll = el('div', 'msf-age-scroll');
+    var selectedBtn = null;
+    for (var age = step.min; age <= step.max; age++) {
+      var btn = el('button', 'msf-age-btn', String(age));
+      btn.type = 'button';
+      if (String(formData[step.field]) === String(age)) { btn.classList.add('active'); selectedBtn = btn; }
+      (function (ageVal, btnEl) {
+        btnEl.addEventListener('click', function () {
+          formData[step.field] = String(ageVal);
+          renderStep(step);
+          autoAdvanceDelay();
+        });
+      })(age, btn);
+      scroll.appendChild(btn);
+    }
+    cardEl.appendChild(scroll);
+    nextBtn.style.display = 'none';
+    setTimeout(function () {
+      var target = selectedBtn || scroll.children[Math.min(65 - step.min, scroll.children.length - 1)];
+      if (target && target.scrollIntoView) target.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }, 0);
+  }
+
+  function renderStep(step) {
+    cardEl.innerHTML = '';
+    clearErrorArea();
+
+    if (currentIndex === 0) {
+      var hero = el('div', 'msf-hero');
+      hero.innerHTML =
+        '<div class="msf-hero-title">' + HERO_TITLE + '</div>' +
+        '<div class="msf-hero-subtitle">' + HERO_SUBTITLE + '</div>' +
+        '<div class="msf-hero-trust">' +
+          '<span class="msf-hero-trust-item">🔒 Impartial</span>' +
+          '<span class="msf-hero-trust-sep">·</span>' +
+          '<span class="msf-hero-trust-item">✅ Gratuit</span>' +
+          '<span class="msf-hero-trust-sep">·</span>' +
+          '<span class="msf-hero-trust-item">🕐 Devis en 2 minutes</span>' +
+        '</div>';
+      cardEl.appendChild(hero);
+    }
+
+    if (step.type !== 'ageGate') {
+      cardEl.appendChild(renderAgentPhoto());
+    }
+
+    if (step.type === 'ageGate') {
+      renderAgeGateStep();
+      return;
+    }
+
+    if (step.type === 'interstitial') {
+      renderInterstitialStep();
+      prevBtn.style.visibility = (currentIndex === 0) ? 'hidden' : 'visible';
+      return;
+    }
+
+    if (step.subtitle) {
+      cardEl.appendChild(el('div', 'msf-eyebrow', step.subtitle));
+    }
+    cardEl.appendChild(el('div', 'msf-title', step.title));
+
+    if (step.description) {
+      cardEl.appendChild(el('div', 'msf-age-description', step.description));
+    }
+
+    if (step.type === 'multiicon') {
+      renderMultiIconStep(step);
+    }
+
+    else if (step.type === 'agepicker') {
+      renderAgePickerStep(step);
+    }
+
+    else if (step.type === 'icon') {
+      var grid = el('div', 'msf-icon-grid');
+      step.options.forEach(function (opt) {
+        var btn = el('button', 'msf-icon-btn');
+        btn.type = 'button';
+        btn.innerHTML = '<span class="msf-icon">' + opt.icon + '</span><span class="msf-icon-label">' + opt.label + '</span>';
+        if (formData[step.field] === opt.value) btn.classList.add('active');
+        btn.addEventListener('click', function () {
+          formData[step.field] = opt.value;
+          renderStep(step);
+          autoAdvanceDelay();
+        });
+        grid.appendChild(btn);
+      });
+      cardEl.appendChild(grid);
+      nextBtn.style.display = 'none';
+    }
+
+    else if (step.type === 'yesno' || step.type === 'choice2') {
+      var labels = step.type === 'yesno' ? ['Oui', 'Non'] : step.choice2;
+      var wrap = el('div', 'msf-options');
+      labels.forEach(function (label) {
+        var btn = el('button', 'msf-option-btn', label);
+        btn.type = 'button';
+        if (formData[step.field] === label) btn.classList.add('active');
+        btn.addEventListener('click', function () {
+          formData[step.field] = label;
+          renderStep(step);
+          autoAdvanceDelay();
+        });
+        wrap.appendChild(btn);
+      });
+      cardEl.appendChild(wrap);
+      nextBtn.style.display = 'none';
+    }
+
+    else if (step.type === 'level' || step.type === 'level4' || step.type === 'buttonlist') {
+      var values = step.type === 'level' ? NIVEAUX : (step.type === 'level4' ? step.level4 : step.list);
+      var wrap2 = el('div', 'msf-options');
+      values.forEach(function (label) {
+        var btn = el('button', 'msf-option-btn' + (step.type === 'buttonlist' ? ' msf-option-btn-wide' : ''), label);
+        btn.type = 'button';
+        if (formData[step.field] === label) btn.classList.add('active');
+        btn.addEventListener('click', function () {
+          if (step.fields) {
+            step.fields.forEach(function (f) { formData[f] = label; });
+          } else {
+            formData[step.field] = label;
+          }
+          renderStep(step);
+          autoAdvanceDelay();
+        });
+        wrap2.appendChild(btn);
+      });
+      cardEl.appendChild(wrap2);
+      nextBtn.style.display = 'none';
+    }
+
+    else if (step.type === 'year') {
+      var yearFieldWrap = el('div', 'msf-field');
+      var yearInput = el('input');
+      yearInput.type = 'text';
+      yearInput.inputMode = 'numeric';
+      yearInput.setAttribute('pattern', '[0-9]*');
+      yearInput.maxLength = 4;
+      yearInput.placeholder = 'AAAA';
+      yearInput.value = formData[step.field] || '';
+      attachYearMask(yearInput);
+      yearInput.addEventListener('blur', function () {
+        if (!yearInput.value) return;
+        var res = validateYear(yearInput.value, step.yearBounds);
+        if (!res.valid) showError(res.message); else clearErrorArea();
+      });
+      yearFieldWrap.appendChild(yearInput);
+      cardEl.appendChild(yearFieldWrap);
+      nextBtn.style.display = 'inline-block';
+      nextBtn.textContent = 'Continuer';
+      setTimeout(function () { yearInput.focus(); }, 0);
+    }
+
+    else if (step.type === 'date') {
+      var fieldWrap = el('div', 'msf-field');
+      var input = el('input');
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.setAttribute('pattern', '[0-9/]*');
+      input.maxLength = 10;
+      input.placeholder = 'JJ/MM/AAAA';
+      input.value = formData[step.field] || '';
+      attachDateMask(input);
+      input.addEventListener('blur', function () {
+        if (!input.value) return;
+        var res = validateDate(input.value, step.dateBounds);
+        if (!res.valid) showError(res.message); else clearErrorArea();
+      });
+      fieldWrap.appendChild(input);
+      cardEl.appendChild(fieldWrap);
+      nextBtn.style.display = 'inline-block';
+      nextBtn.textContent = 'Continuer';
+      setTimeout(function () { input.focus(); }, 0);
+    }
+
+    else if (step.type === 'contact') {
+      renderContactStep();
+    }
+
+    prevBtn.style.visibility = (currentIndex === 0) ? 'hidden' : 'visible';
+  }
+
+  function renderContactStep() {
+    var grid = el('div', 'msf-form-grid');
+
+    function field(id, label, type, span, autocompleteValue) {
+      var wrap = el('div', 'msf-form-field' + (span ? ' msf-span2' : ''));
+      var lab = el('label', null, label);
+      lab.setAttribute('for', 'msf-' + id);
+      var input = el('input');
+      input.type = type || 'text';
+      input.id = 'msf-' + id;
+      if (autocompleteValue) input.autocomplete = autocompleteValue;
+      input.value = formData[id] || '';
+      wrap.appendChild(lab);
+      wrap.appendChild(input);
+      grid.appendChild(wrap);
+      return input;
+    }
+
+    field('nom', 'Nom', 'text', false, 'family-name');
+    field('prenom', 'Prénom', 'text', false, 'given-name');
+    field('codePostal', 'Code postal', 'text', false, 'postal-code').maxLength = 5;
+    field('ville', 'Ville', 'text', false, 'address-level2');
+    field('telephone', 'Téléphone', 'tel', false, 'tel');
+    field('email', 'Email', 'email', true, 'email');
+
+    cardEl.appendChild(grid);
+
+    // Honeypot anti-bot : champ neutre, invisible, hors tabulation
+    var trap = el('div', 'msf-hidden-field');
+    var trapInput = el('input');
+    trapInput.type = 'text';
+    trapInput.id = 'msf-complement';
+    trapInput.name = 'complement';
+    trapInput.tabIndex = -1;
+    trapInput.autocomplete = 'off';
+    trap.appendChild(trapInput);
+    cardEl.appendChild(trap);
+
+    var consent = el('div', 'msf-consent');
+
+    var rgpdRow = el('div', 'msf-checkbox-row');
+    var rgpdBox = el('input');
+    rgpdBox.type = 'checkbox';
+    rgpdBox.id = 'msf-rgpd';
+    var rgpdLabel = el('label',
+      null,
+      'J\'accepte que mes données soient transmises aux partenaires afin de traiter ma demande, conformément à la <a href="' + PRIVACY_URL + '" target="_blank" rel="noopener">politique de confidentialité</a> et aux <a href="' + TERMS_URL + '" target="_blank" rel="noopener">CGU</a>.'
+    );
+    rgpdLabel.setAttribute('for', 'msf-rgpd');
+    rgpdRow.appendChild(rgpdBox);
+    rgpdRow.appendChild(rgpdLabel);
+    consent.appendChild(rgpdRow);
+
+    var nlRow = el('div', 'msf-checkbox-row');
+    var nlBox = el('input');
+    nlBox.type = 'checkbox';
+    nlBox.id = 'msf-newsletter';
+    nlBox.checked = formData.newsletter === 'Oui';
+    var nlLabel = el('label', null, 'Je souhaite recevoir la newsletter et les offres par email.');
+    nlLabel.setAttribute('for', 'msf-newsletter');
+    nlRow.appendChild(nlBox);
+    nlRow.appendChild(nlLabel);
+    consent.appendChild(nlRow);
+
+    cardEl.appendChild(consent);
+
+    if (formData.rgpd) rgpdBox.checked = true;
+
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Envoyer ma demande';
+  }
+
+  function validateCurrentStep(step) {
+    clearErrorArea();
+
+    if (step.type === 'date') {
+      var input = cardEl.querySelector('input[type="text"]');
+      var val = (input.value || '').trim();
+      var res = validateDate(val, step.dateBounds);
+      if (!res.valid) { showError(res.message || 'Merci de renseigner une date valide.'); return false; }
+      formData[step.field] = val;
+      return true;
+    }
+
+    if (step.type === 'year') {
+      var yearInputEl = cardEl.querySelector('input[type="text"]');
+      var yearVal = (yearInputEl.value || '').trim();
+      var yearRes = validateYear(yearVal, step.yearBounds);
+      if (!yearRes.valid) { showError(yearRes.message || 'Merci de renseigner une année valide.'); return false; }
+      formData[step.field] = yearVal;
+      return true;
+    }
+
+    if (step.type === 'multiicon') {
+      var selection = formData[step.field];
+      if (!Array.isArray(selection) || selection.length === 0) {
+        showError('Merci de sélectionner au moins une option.');
+        return false;
+      }
+      return true;
+    }
+
+    if (step.type === 'contact') {
+      var nom = document.getElementById('msf-nom').value.trim();
+      var prenom = document.getElementById('msf-prenom').value.trim();
+      var cp = document.getElementById('msf-codePostal').value.trim();
+      var ville = document.getElementById('msf-ville').value.trim();
+      var tel = document.getElementById('msf-telephone').value.trim();
+      var email = document.getElementById('msf-email').value.trim();
+      var rgpd = document.getElementById('msf-rgpd').checked;
+      var newsletter = document.getElementById('msf-newsletter').checked;
+      var rgpdLabelEl = document.querySelector('label[for="msf-rgpd"]');
+      var rgpdTexte = rgpdLabelEl ? rgpdLabelEl.textContent.trim() : '';
+
+      if (!nom || !prenom) { showError('Merci de renseigner votre nom et prénom.'); return false; }
+      if (!ville) { showError('Merci de renseigner votre ville.'); return false; }
+      if (!/^\d{5}$/.test(cp)) { showError('Merci de renseigner un code postal à 5 chiffres.'); return false; }
+      if (!/^[0-9+\s.]{6,}$/.test(tel)) { showError('Merci de renseigner un numéro de téléphone valide.'); return false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Merci de renseigner un email valide.'); return false; }
+      if (!rgpd) { showError('Merci d\'accepter la transmission de vos données pour continuer.'); return false; }
+
+      formData.nom = nom;
+      formData.prenom = prenom;
+      formData.codePostal = cp;
+      formData.ville = ville;
+      formData.telephone = tel;
+      formData.email = email;
+      formData.rgpd = rgpd;
+      formData.rgpdTexte = rgpdTexte;
+      formData.newsletter = newsletter ? 'Oui' : 'Non';
+      formData.complement = document.getElementById('msf-complement').value;
+      return true;
+    }
+
+    return true;
+  }
+
+  function updateProgress() {
+    var steps = getVisibleSteps();
+    var currentStep = steps[currentIndex] || { phase: 1 };
+    var states = {};
+    [1, 2, 3].forEach(function (phase) {
+      if (currentStep.phase > phase) {
+        states[phase] = { status: 'done', pct: 100 };
+      } else if (currentStep.phase < phase) {
+        states[phase] = { status: 'pending', pct: 0 };
+      } else {
+        var stepsInPhase = steps.filter(function (s) { return s.phase === phase; });
+        var idxInPhase = stepsInPhase.indexOf(currentStep);
+        var pct = Math.round(((idxInPhase + 1) / stepsInPhase.length) * 100);
+        states[phase] = { status: 'active', pct: pct };
+      }
+    });
+    renderTabs(states);
+  }
+
+  function goNext(fromAutoAdvance) {
+    var steps = getVisibleSteps();
+    var step = steps[currentIndex];
+    if (!fromAutoAdvance) {
+      if (!validateCurrentStep(step)) return;
+    }
+
+    if (step.type === 'contact') {
+      submitForm();
+      return;
+    }
+
+    if (currentIndex < steps.length - 1) {
+      currentIndex++;
+      render();
+    }
+  }
+
+  function goPrev() {
+    if (currentIndex > 0) {
+      var leavingStep = getVisibleSteps()[currentIndex];
+      pushDataLayer('msf_step_back', { step_id: leavingStep.id });
+      currentIndex--;
+      render();
+    }
+  }
+
+  function render() {
+    var steps = getVisibleSteps();
+    if (currentIndex > steps.length - 1) currentIndex = steps.length - 1;
+    var step = steps[currentIndex];
+    renderStep(step);
+    updateProgress();
+    pushDataLayer('msf_step_view', {
+      step_id: step.id,
+      step_phase: step.phase,
+      step_index: currentIndex + 1,
+      step_total: steps.length,
+      step_type: step.type
+    });
+  }
+
+  prevBtn.addEventListener('click', goPrev);
+  nextBtn.addEventListener('click', function () { goNext(false); });
+
+  // ============================================================
+  // Modale "Contactez-nous" (bouton visible sur toutes les questions)
+  // ============================================================
+  var contactBtn = document.getElementById('msf-contact-btn');
+  var contactOverlay = document.getElementById('msf-contact-overlay');
+  var contactModalClose = document.getElementById('msf-contact-modal-close');
+  var contactCountdownEl = document.getElementById('msf-contact-countdown');
+  var contactCallBtn = document.getElementById('msf-contact-modal-call');
+  var contactCountdownInterval = null;
+
+  contactCallBtn.href = 'tel:' + CONTACT_PHONE_TEL;
+  contactCallBtn.textContent = '📞 ' + CONTACT_PHONE_DISPLAY;
+
+  function formatCountdown(totalSeconds) {
+    var m = Math.floor(totalSeconds / 60);
+    var s = totalSeconds % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function openContactModal() {
+    contactOverlay.classList.add('show');
+    var remaining = 290; // 4:50
+    contactCountdownEl.textContent = formatCountdown(remaining);
+    clearInterval(contactCountdownInterval);
+    contactCountdownInterval = setInterval(function () {
+      remaining--;
+      if (remaining <= 0) remaining = 290;
+      contactCountdownEl.textContent = formatCountdown(remaining);
+    }, 1000);
+  }
+
+  function closeContactModal() {
+    contactOverlay.classList.remove('show');
+    clearInterval(contactCountdownInterval);
+  }
+
+  contactBtn.addEventListener('click', function () {
+    openContactModal();
+    pushDataLayer('msf_contact_modal_open');
+  });
+  contactModalClose.addEventListener('click', closeContactModal);
+  contactOverlay.addEventListener('click', function (e) {
+    if (e.target === contactOverlay) closeContactModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && contactOverlay.classList.contains('show')) closeContactModal();
+  });
+  contactCallBtn.addEventListener('click', function () {
+    pushDataLayer('msf_contact_modal_call_click');
+  });
+
+  // ============================================================
+  // Scoring (100% côté client, aucune dépendance serveur)
+  // ============================================================
+  function computeScore(fd) {
+    var score = 0;
+
+    // Âge de l'assuré principal
+    var age = parseInt(fd.age, 10);
+    if (isNaN(age)) score += SCORING.age.ptsAutre;
+    else if (age >= SCORING.age.seuilSenior) score += SCORING.age.ptsSenior;
+    else if (age >= SCORING.age.seuilInter) score += SCORING.age.ptsInter;
+    else score += SCORING.age.ptsAutre;
+
+    // Couverture actuelle
+    if (fd.couverture !== 'Oui') score += SCORING.couverture.ptsAucune;
+    else if (fd.contrat === 'Oui') score += SCORING.couverture.ptsContratAncien;
+    else score += SCORING.couverture.ptsContratRecent;
+
+    // Besoins spécifiques exprimés (hors "aucun besoin")
+    var besoins = Array.isArray(fd.besoinsSpecifiques) ? fd.besoinsSpecifiques.filter(function (b) { return b !== BESOIN_AUCUN; }) : [];
+    var besoinsRatio = Math.min(besoins.length / (BESOINS_OPTIONS.length - 1), 1);
+    score += Math.round(besoinsRatio * SCORING.niveauRemboursement.ptsMax);
+
+    // Urgence de la date de début de contrat
+    var target = parseDateStr(fd.dateContrat);
+    if (target) {
+      var diffDays = Math.round((target - new Date()) / 86400000);
+      if (diffDays <= SCORING.urgenceContrat.joursCourt) score += SCORING.urgenceContrat.ptsCourt;
+      else if (diffDays <= SCORING.urgenceContrat.joursMoyen) score += SCORING.urgenceContrat.ptsMoyen;
+      else score += SCORING.urgenceContrat.ptsLong;
+    }
+
+    // Composition du foyer
+    score += SCORING.foyer[fd.foyer] || 0;
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
+  function statutLeadFor(score) {
+    if (score >= SCORING.seuilChaud) return 'Chaud';
+    if (score >= SCORING.seuilQualification) return 'Tiède';
+    return 'Froid';
+  }
+
+  // ============================================================
+  // Tracking publicitaire (UTM, gclid, fbclid, URL)
+  // ============================================================
+  function initTracking() {
+    var params = new URLSearchParams(window.location.search);
+    var map = {
+      'msf-utm-source': params.get('utm_source') || '',
+      'msf-utm-medium': params.get('utm_medium') || '',
+      'msf-utm-campaign': params.get('utm_campaign') || '',
+      'msf-utm-content': params.get('utm_content') || '',
+      'msf-utm-term': params.get('utm_term') || '',
+      'msf-gclid': params.get('gclid') || '',
+      'msf-fbclid': params.get('fbclid') || '',
+      'msf-current-url': window.location.href,
+      'msf-referrer-url': document.referrer || ''
+    };
+    Object.keys(map).forEach(function (id) {
+      var input = document.getElementById(id);
+      if (input) input.value = map[id];
+    });
+  }
+
+  function getTrackingPayload() {
+    return {
+      utm_source: document.getElementById('msf-utm-source').value,
+      utm_medium: document.getElementById('msf-utm-medium').value,
+      utm_campaign: document.getElementById('msf-utm-campaign').value,
+      utm_content: document.getElementById('msf-utm-content').value,
+      utm_term: document.getElementById('msf-utm-term').value,
+      gclid: document.getElementById('msf-gclid').value,
+      fbclid: document.getElementById('msf-fbclid').value,
+      currentUrl: document.getElementById('msf-current-url').value,
+      referrerUrl: document.getElementById('msf-referrer-url').value
+    };
+  }
+
+  // ============================================================
+  // Soumission finale
+  // ============================================================
+  function buildPayload() {
+    var enfantsDates = [];
+    for (var i = 1; i <= 4; i++) {
+      if (formData['naissanceEnfant' + i]) enfantsDates.push(formData['naissanceEnfant' + i]);
+    }
+
+    var score = computeScore(formData);
+    var isBot = !!(formData.complement && formData.complement.trim() !== '');
+    var besoinsList = Array.isArray(formData.besoinsSpecifiques) ? formData.besoinsSpecifiques : [];
+
+    var payload = {
+      dateContrat: formData.dateContrat || '',
+      hospitalisation: hasBesoin(formData, 'Hospitalisation') ? 'Oui' : 'Non',
+      optique: hasBesoin(formData, 'Optique') ? 'Oui' : 'Non',
+      dentaire: hasBesoin(formData, 'Dentaire') ? 'Oui' : 'Non',
+      soinsMedicaux: (hasBesoin(formData, 'Audition') || hasBesoin(formData, 'Kinésithérapie') || hasBesoin(formData, 'Cure Thermale') || hasBesoin(formData, 'Autres')) ? 'Oui' : 'Non',
+      besoinsSpecifiques: besoinsList.filter(function (b) { return b !== BESOIN_AUCUN; }).join(', '),
+      couverture: formData.couverture || '',
+      contrat: formData.contrat || '',
+      nom: formData.nom || '',
+      prenom: formData.prenom || '',
+      email: formData.email || '',
+      telephone: formData.telephone || '',
+      codePostal: formData.codePostal || '',
+      ville: formData.ville || '',
+      age: formData.age || '',
+      foyer: formData.foyer || '',
+      profession: formData.profession || '',
+      regimeSocial: formData.regimeSocial || '',
+      secteurAssure: formData.secteurAssure || '',
+      naissanceConjoint: formData.naissanceConjoint || '',
+      professionConjoint: formData.professionConjoint || '',
+      regimeSocialConjoint: formData.regimeSocialConjoint || '',
+      secteurConjoint: formData.secteurConjoint || '',
+      nombreEnfants: formData.nombreEnfants || '',
+      naissanceEnfants: enfantsDates.join(' / '),
+      newsletter: formData.newsletter || 'Non',
+      rgpdConsent: formData.rgpd ? 'Oui' : 'Non',
+      rgpdTexte: formData.rgpdTexte || '',
+      rgpdVersion: CONSENT_VERSION,
+      score: score,
+      qualifie: score >= SCORING.seuilQualification ? 'Oui' : 'Non',
+      statutLead: statutLeadFor(score),
+      complement: formData.complement || '',
+      is_bot: isBot
+    };
+
+    var tracking = getTrackingPayload();
+    Object.keys(tracking).forEach(function (k) { payload[k] = tracking[k]; });
+
+    return payload;
+  }
+
+  function renderSending() {
+    cardEl.innerHTML = '';
+    var res = el('div', 'msf-result');
+    res.innerHTML =
+      '<div class="msf-result-icon msf-loading">⏳</div>' +
+      '<div class="msf-result-title">Enregistrement en cours...</div>' +
+      '<div class="msf-result-text">Merci de patienter quelques instants.</div>';
+    cardEl.appendChild(res);
+    document.getElementById('msf-nav').style.display = 'none';
+    setActivePhase(3);
+  }
+
+  function renderSuccess() {
+    cardEl.innerHTML = '';
+    var res = el('div', 'msf-result');
+    res.innerHTML =
+      '<div class="msf-result-icon">✓</div>' +
+      '<div class="msf-result-title">Merci, votre demande a bien été envoyée !</div>' +
+      '<div class="msf-result-text">Un conseiller vous recontactera prochainement pour vous accompagner dans votre projet.</div>';
+    cardEl.appendChild(res);
+  }
+
+  function renderErrorScreen() {
+    cardEl.innerHTML = '';
+    var res = el('div', 'msf-result');
+    res.innerHTML =
+      '<div class="msf-result-icon" style="background:var(--msf-error);">!</div>' +
+      '<div class="msf-result-title">Un problème est survenu</div>' +
+      '<div class="msf-result-text">Votre demande n\'a pas pu être envoyée. Merci de réessayer.</div>';
+    cardEl.appendChild(res);
+    document.getElementById('msf-nav').style.display = 'flex';
+    prevBtn.style.visibility = 'hidden';
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Réessayer';
+    nextBtn.onclick = function () { nextBtn.onclick = null; submitForm(); };
+  }
+
+  // Pousse un événement générique dans le dataLayer (plan de tagage GTM).
+  // Aucune donnée personnelle (nom/email/téléphone) ne doit transiter ici.
+  function pushDataLayer(eventName, params) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(Object.assign({ event: eventName }, params || {}));
+  }
+
+  // Déclenche l'événement de conversion pour GTM/GA4/Meta Pixel une fois le lead envoyé.
+  // Ne se déclenche pas pour les soumissions détectées comme bot (honeypot).
+  function trackLeadConversion(payload) {
+    if (payload.is_bot) return;
+
+    pushDataLayer('lead_mutuelle', {
+      leadScore: payload.score,
+      leadStatut: payload.statutLead,
+      leadQualifie: payload.qualifie,
+      newsletter: payload.newsletter
+    });
+
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead');
+    }
+  }
+
+  function submitForm() {
+    stage = 'sending';
+    renderSending();
+
+    var payload = buildPayload();
+
+    if (!payload.is_bot) {
+      pushDataLayer('msf_lead_submit_attempt', {
+        leadScore: payload.score,
+        leadStatut: payload.statutLead
+      });
+    }
+
+    if (!WEBHOOK_URL || WEBHOOK_URL.indexOf('REMPLACER') === 0) {
+      // Pas d'URL configurée : on simule un succès pour ne pas bloquer les tests.
+      setTimeout(function () {
+        trackLeadConversion(payload);
+        renderSuccess();
+      }, 500);
+      return;
+    }
+
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(payload)
+    }).then(function () {
+      stage = 'done';
+      trackLeadConversion(payload);
+      renderSuccess();
+    }).catch(function () {
+      pushDataLayer('msf_lead_submit_error');
+      renderErrorScreen();
+    });
+  }
+
+  // ============================================================
+  // Initialisation
+  // ============================================================
+  initTracking();
+  pushDataLayer('msf_form_view');
+  render();
+})();
+</script>
+
+</body>
+</html>
