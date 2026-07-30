@@ -265,14 +265,14 @@
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding: clamp(3px, 1vh, 6px) 30px clamp(4px, 1vh, 10px);
+    padding: clamp(3px, 1vh, 6px) 42px clamp(4px, 1vh, 10px);
     scroll-snap-type: x proximity;
   }
   #msf-widget .msf-age-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px;
+    font-size: 34px;
     font-weight: 900;
     color: var(--msf-primary);
     pointer-events: none;
@@ -356,7 +356,7 @@
     color: var(--msf-muted);
     white-space: nowrap;
   }
-  #msf-widget .msf-partner-badge img { max-height: 26px; display: block; }
+  #msf-widget .msf-partner-badge img { max-height: 26px; display: block; mix-blend-mode: multiply; }
 
   /* ---- Variante compacte (petits logos sur la 1re et la dernière page) ---- */
   #msf-widget .msf-partner-block-compact { margin-top: clamp(6px, 1.4vh, 12px); text-align: center; }
@@ -368,7 +368,7 @@
     padding: 3px 8px;
     font-size: 9px;
   }
-  #msf-widget .msf-partner-badge-compact img { max-height: 19px; }
+  #msf-widget .msf-partner-badge-compact img { max-height: 19px; mix-blend-mode: multiply; }
 
   /* ---- Choix simples (Oui/Non, niveaux, secteur...) ---- */
   #msf-widget .msf-options {
@@ -1536,6 +1536,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var rgpdBox = el('input');
     rgpdBox.type = 'checkbox';
     rgpdBox.id = 'msf-rgpd';
+    rgpdBox.checked = true;
     var rgpdLabel = el('label',
       null,
       'J\'accepte que mes données soient transmises aux partenaires afin de traiter ma demande, conformément à la <a href="' + PRIVACY_URL + '" target="_blank" rel="noopener">politique de confidentialité</a> et aux <a href="' + TERMS_URL + '" target="_blank" rel="noopener">CGU</a>.'
@@ -1545,20 +1546,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     rgpdRow.appendChild(rgpdLabel);
     consent.appendChild(rgpdRow);
 
-    var nlRow = el('div', 'msf-checkbox-row');
-    var nlBox = el('input');
-    nlBox.type = 'checkbox';
-    nlBox.id = 'msf-newsletter';
-    nlBox.checked = formData.newsletter === 'Oui';
-    var nlLabel = el('label', null, 'Je souhaite recevoir la newsletter et les offres par email.');
-    nlLabel.setAttribute('for', 'msf-newsletter');
-    nlRow.appendChild(nlBox);
-    nlRow.appendChild(nlLabel);
-    consent.appendChild(nlRow);
-
     cardEl.appendChild(consent);
 
-    if (formData.rgpd) rgpdBox.checked = true;
+    if (formData.rgpd === false) rgpdBox.checked = false;
+    else if (formData.rgpd) rgpdBox.checked = true;
 
     nextBtn.style.display = 'inline-block';
     nextBtn.textContent = 'Envoyer ma demande';
@@ -1602,7 +1593,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var tel = document.getElementById('msf-telephone').value.trim();
       var email = document.getElementById('msf-email').value.trim();
       var rgpd = document.getElementById('msf-rgpd').checked;
-      var newsletter = document.getElementById('msf-newsletter').checked;
       var rgpdLabelEl = document.querySelector('label[for="msf-rgpd"]');
       var rgpdTexte = rgpdLabelEl ? rgpdLabelEl.textContent.trim() : '';
 
@@ -1621,7 +1611,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       formData.email = email;
       formData.rgpd = rgpd;
       formData.rgpdTexte = rgpdTexte;
-      formData.newsletter = newsletter ? 'Oui' : 'Non';
       formData.complement = document.getElementById('msf-complement').value;
       return true;
     }
