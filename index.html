@@ -719,14 +719,61 @@
     #msf-widget .msf-age-description { display: none; }
     #msf-widget .msf-partner-label, #msf-widget .msf-partner-logos { display: none; }
   }
+
 </style>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-M8L54GS4');</script>
-<!-- End Google Tag Manager -->
+<!-- tarteaucitron.js : bannière de consentement RGPD/CNIL + Google Consent Mode v2 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tarteaucitronjs/1.34.0/css/tarteaucitron.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tarteaucitronjs/1.34.0/tarteaucitron.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tarteaucitronjs/1.34.0/lang/tarteaucitron.fr.js"></script>
+<script>
+tarteaucitron.init({
+  "privacyUrl": "#politique-de-confidentialite",
+  "bodyPosition": "bottom",
+  "hashtag": "#tarteaucitron",
+  "cookieName": "tarteaucitron",
+  "orientation": "middle",
+  "groupServices": true,
+  "showDetailsOnClick": true,
+  "serviceDefaultState": "wait",
+  "showAlertSmall": false,
+  "cookieslist": false,
+  "AcceptAllCta": true,
+  "DenyAllCta": true,
+  "highPrivacy": true,
+  "handleBrowserDNTRequest": false,
+  "removeCredit": false,
+  "moreInfoLink": true,
+  "useExternalCss": false,
+  "useExternalJs": false,
+  "googleConsentMode": true,
+  "googleConsentModeDefaultOnConsentGiven": true
+});
+
+// Google Tag Manager, chargé et bloqué par tarteaucitron (service natif "googletagmanager").
+// C'est ce service - et non un job custom - qui pilote le Consent Mode v2 et fait apparaître le bandeau.
+tarteaucitron.user.googletagmanagerId = 'GTM-M8L54GS4';
+(tarteaucitron.job = tarteaucitron.job || []);
+tarteaucitron.job.push('googletagmanager');
+
+// Relie le choix de l'utilisateur au Consent Mode v2 (tarteaucitron ne le fait pas
+// nativement pour le service "googletagmanager", seulement pour ses services gtag/googleads internes).
+document.addEventListener('googletagmanager_consentModeOk', function () {
+  window.tac_gtag('consent', 'update', {
+    'ad_storage': 'granted',
+    'ad_user_data': 'granted',
+    'ad_personalization': 'granted',
+    'analytics_storage': 'granted'
+  });
+});
+document.addEventListener('googletagmanager_consentModeKo', function () {
+  window.tac_gtag('consent', 'update', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied'
+  });
+});
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
